@@ -13,6 +13,12 @@ var mainFsm = new machina.Fsm({
   initialize : function() {
     var self = this;
     d3.csv('/data/metrocard-usage.csv', function(data) {
+      _.map(data, function(d) {
+        return _.extend(d, {
+          borough : d.pretty_census_tract.split(',')[0]
+        });
+      });
+
       self.data = data;
       self.transition('setup');
     });
@@ -39,7 +45,12 @@ var mainFsm = new machina.Fsm({
 
         this.stations.enter().append('svg:circle')
           .classed('station', true)
-          .attr('r', 5)
+          .each(function(d) {
+            // you can't dynamically set the class name with class, so
+            // we resort to this
+            d3.select(this).classed(d.borough.toLowerCase(), true);
+          })
+          .attr('r', scaleWithValue(ridersScale, 'daily_riders') )
           .attr('cx', 10)
           .attr('cy', 10)
           .on('mouseenter', function(d) {
@@ -56,13 +67,9 @@ var mainFsm = new machina.Fsm({
         var xScale = ratioScale.copy().range([this.padding,this.width - this.padding]);
         var yScale = medianIncomeScale.copy().range([this.height - this.padding, this.padding]);
         
-        this.stations.attr('cx', function(d) {
-          return xScale(d['30day_7day_ratio']);
-        }).attr('cy', function(d) {
-          return yScale(d.median_household_income);
-        }).attr('r', function(d) {
-          return ridersScale(d.daily_riders);
-        });
+        this.stations.attr('cx', scaleWithValue(xScale, '30day_7day_ratio') )
+          .attr('cy', scaleWithValue(yScale, 'median_household_income') )
+          .attr('r', scaleWithValue(ridersScale, 'daily_riders') );
       }
     }
   }
