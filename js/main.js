@@ -67,7 +67,8 @@ var mainFsm = new machina.Fsm({
         var xScale = ratioScale.copy().range([this.padding,this.width - this.padding]);
         var yScale = medianIncomeScale.copy().range([this.height - this.padding, this.padding]);
         
-        this.stations.attr('cx', scaleWithValue(xScale, '30day_7day_ratio') )
+        this.stations.transition(250)
+          .attr('cx', scaleWithValue(xScale, '30day_7day_ratio') )
           .attr('cy', scaleWithValue(yScale, 'median_household_income') )
           .attr('r', scaleWithValue(ridersScale, 'daily_riders') );
       }
