@@ -1,0 +1,22 @@
+{
+  "name": "mta-timed-cards",
+  "version": "0.0.0",
+  "homepage": "https://github.com/futuraprime/mta-timed-cards",
+  "authors": [
+    "Evan Hensleigh <futuraprime@gmail.com>"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "deps",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "d3": "~3.5.3",
+    "machina": "~0.4.3"
+  }
+}

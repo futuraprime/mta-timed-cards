@@ -1,0 +1,69 @@
+var ratioScale = d3.scale.log().base(2).domain([0.3, 10]);
+var medianIncomeScale = d3.scale.linear().domain([0,250000]);
+
+// the rider scale gets a range because really, this won't be changing much
+var ridersScale = d3.scale.log().domain([100,250000]).range([1,10]);
+
+function scaleWithValue(scale, value) {
+  return function(d) { return scale(d[value]); };
+}
+
+var mainFsm = new machina.Fsm({
+  padding : 20,
+  initialize : function() {
+    var self = this;
+    d3.csv('/data/metrocard-usage.csv', function(data) {
+      self.data = data;
+      self.transition('setup');
+    });
+
+    this.theater = d3.select('#theater');
+    this.svgElement = this.theater.node();
+  },
+  updateDimensions : function() {
+    var svgBBox = this.svgElement.getBoundingClientRect();
+    this.width = svgBBox.width;
+    this.height = svgBBox.height;
+  },
+
+  'initialState' : 'loading',
+
+  states : {
+    loading : {
+      // not much to see here
+    },
+    setup : {
+      _onEnter : function() {
+        this.stations = this.theater.selectAll('circle.station')
+          .data(this.data);
+
+        this.stations.enter().append('svg:circle')
+          .classed('station', true)
+          .attr('r', 5)
+          .attr('cx', 10)
+          .attr('cy', 10)
+          .on('mouseenter', function(d) {
+            console.log(d);
+          });
+
+        this.transition('scatter');
+      }
+    },
+    scatter : {
+      _onEnter : function() {
+        this.updateDimensions();
+
+        var xScale = ratioScale.copy().range([this.padding,this.width - this.padding]);
+        var yScale = medianIncomeScale.copy().range([this.height - this.padding, this.padding]);
+        
+        this.stations.attr('cx', function(d) {
+          return xScale(d['30day_7day_ratio']);
+        }).attr('cy', function(d) {
+          return yScale(d.median_household_income);
+        }).attr('r', function(d) {
+          return ridersScale(d.daily_riders);
+        });
+      }
+    }
+  }
+});
